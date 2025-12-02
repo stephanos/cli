@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/temporalio/cli/cliext"
 	"github.com/temporalio/cli/internal/printer"
 	activitypb "go.temporal.io/api/activity/v1"
 	"go.temporal.io/api/batch/v1"
@@ -39,7 +40,7 @@ func (c *TemporalActivityCompleteCommand) run(cctx *CommandContext, args []strin
 	defer cl.Close()
 
 	metadata := map[string][][]byte{"encoding": {[]byte("json/plain")}}
-	resultPayloads, err := CreatePayloads([][]byte{[]byte(c.Result)}, metadata, false)
+	resultPayloads, err := cliext.CreatePayloads([][]byte{[]byte(c.Result)}, metadata, nil)
 	if err != nil {
 		return err
 	}
@@ -68,7 +69,7 @@ func (c *TemporalActivityFailCommand) run(cctx *CommandContext, args []string) e
 	var detailPayloads *common.Payloads
 	if len(c.Detail) > 0 {
 		metadata := map[string][][]byte{"encoding": {[]byte("json/plain")}}
-		detailPayloads, err = CreatePayloads([][]byte{[]byte(c.Detail)}, metadata, false)
+		detailPayloads, err = cliext.CreatePayloads([][]byte{[]byte(c.Detail)}, metadata, nil)
 		if err != nil {
 			return err
 		}

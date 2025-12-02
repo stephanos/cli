@@ -10,7 +10,6 @@ import (
 	"log/slog"
 	"os"
 	"os/signal"
-	"slices"
 	"strings"
 	"syscall"
 	"time"
@@ -329,53 +328,6 @@ func (c *CommandContext) promptString(message string, expected string, autoConfi
 	return line == expected, nil
 }
 
-// Execute runs the Temporal CLI with the given context and options. This
-// intentionally does not return an error but rather invokes Fail on the
-// options.
-func Execute(ctx context.Context, options CommandOptions) {
-	// Create context and run. We always get a context and cancel func back even
-	// if an error was returned. This is so we can use the context to print an
-	// error message using the appropriate Fail() method, regardless of why the
-	// failure occurred.
-	//
-	// (In most cases, an error here likely means a problem with the user's env
-	// config file, or some other issue in their environment.)
-	cctx, cancel, err := NewCommandContext(ctx, options)
-	defer cancel()
-
-	if err == nil {
-		// We have a context; let's actually run the command.
-		cmd := NewTemporalCommand(cctx)
-		cmd.Command.SetArgs(cctx.Options.Args)
-		err = cmd.Command.ExecuteContext(cctx)
-	}
-
-	if err != nil {
-		// Either we failed to create the context, OR the command itself failed.
-		// Either way, we need to print an error message.
-		cctx.Options.Fail(err)
-	}
-
-	// If no command ever actually got run, exit nonzero with an error.  This is
-	// an ugly hack to make sure that iff the user explicitly asked for help, we
-	// exit with a zero error code.  (The other situation in which help is
-	// printed is when the user invokes an unknown command--we still want a
-	// non-zero exit in that case.)  We should revisit this if/when the
-	// following Cobra issues get fixed:
-	//
-	// - https://github.com/spf13/cobra/issues/1156
-	// - https://github.com/spf13/cobra/issues/706
-	if !cctx.ActuallyRanCommand {
-		zeroExitArgs := []string{"--help", "-h", "--version", "-v", "help"}
-		if slices.ContainsFunc(cctx.Options.Args, func(a string) bool {
-			return slices.Contains(zeroExitArgs, a)
-		}) {
-			return
-		}
-		cctx.Options.Fail(fmt.Errorf("unknown command"))
-	}
-}
-
 // getUsageTemplate returns a custom usage template with proper flag wrapping
 // The default template can be found here: https://github.com/spf13/cobra/blob/v1.9.1/command.go#L1937-L1966
 func getUsageTemplate() string {
@@ -426,6 +378,9 @@ func (c *TemporalCommand) initCommand(cctx *CommandContext) {
 
 	// Set custom usage template with proper flag wrapping
 	c.Command.SetUsageTemplate(getUsageTemplate())
+
+	// Configure custom help command with --all support for extensions
+	c.configureHelpCommand(cctx)
 
 	// Unfortunately color is a global option, so we can set in pre-run but we
 	// must unset in post-run

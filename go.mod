@@ -12,8 +12,8 @@ require (
 	github.com/mattn/go-isatty v0.0.20
 	github.com/nexus-rpc/sdk-go v0.3.0
 	github.com/olekukonko/tablewriter v0.0.5
-	github.com/spf13/cobra v1.9.1
-	github.com/spf13/pflag v1.0.6
+	github.com/spf13/cobra v1.10.2
+	github.com/spf13/pflag v1.0.9
 	github.com/stretchr/testify v1.10.0
 	github.com/temporalio/ui-server/v2 v2.42.1
 	go.temporal.io/api v1.53.0
@@ -156,7 +156,7 @@ require (
 	golang.org/x/crypto v0.38.0 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/net v0.40.0 // indirect
-	golang.org/x/oauth2 v0.30.0 // indirect
+	golang.org/x/oauth2 v0.33.0 // indirect
 	golang.org/x/sync v0.14.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
@@ -176,3 +176,7 @@ require (
 	modernc.org/strutil v1.2.1 // indirect
 	modernc.org/token v1.1.0 // indirect
 )
+
+require github.com/temporalio/cli/cliext v0.0.0
+
+replace github.com/temporalio/cli/cliext => ./cliext

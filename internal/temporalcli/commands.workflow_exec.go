@@ -14,6 +14,7 @@ import (
 
 	"github.com/fatih/color"
 	"github.com/google/uuid"
+	"github.com/temporalio/cli/cliext"
 	"github.com/temporalio/cli/internal/printer"
 	"go.temporal.io/api/common/v1"
 	commonpb "go.temporal.io/api/common/v1"
@@ -662,7 +663,11 @@ func (p *PayloadInputOptions) buildRawInputPayloads() (*common.Payloads, error) 
 	if _, ok := metadata["encoding"]; !ok {
 		metadata["encoding"] = [][]byte{[]byte("json/plain")}
 	}
-	return CreatePayloads(inData, metadata, p.InputBase64)
+	var decoder cliext.Decoder
+	if p.InputBase64 {
+		decoder = cliext.Base64Decoder
+	}
+	return cliext.CreatePayloads(inData, metadata, decoder)
 }
 
 // Rules:
